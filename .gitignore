@@ -1,0 +1,10 @@
+# Bases de datos locales
+/api_nestbook/myapidb_data/
+
+# Caché de Python
+__pycache__/
+*.pyc
+
+# Ignorar caché en cualquier subcarpeta de forma general
+**/__pycache__/
+
