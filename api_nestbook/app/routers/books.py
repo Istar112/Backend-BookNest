@@ -7,6 +7,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from typing import List
 # tengo que importar las clases bassemodel
 from app.models import BookBase, BookDb
+
 from app.database import (
     get_book_by_id,
     insert_book,
@@ -14,12 +15,13 @@ from app.database import (
     get_book_by_isbn,
 )
 
+
 router = APIRouter(prefix="/books", tags=["Books"])
 
 # Create a book
 @router.post("/create_book/", status_code=status.HTTP_201_CREATED)
 async def create_book(book_in: BookBase):
-    bookDb = get_book_by_id(book_in.id)
+    bookDb = get_book_by_isbn(book_in.isbn)
 
     if bookDb:
         raise HTTPException(
@@ -29,6 +31,7 @@ async def create_book(book_in: BookBase):
     
     insert_book(
         BookDb(
+            id=0,
             isbn=book_in.isbn,
             title=book_in.title,
             category=book_in.category,
