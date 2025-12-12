@@ -1,4 +1,4 @@
-from app.models import UserDb
+from app.models import UserDb,BookDb
 import mariadb
 
 db_config = {
@@ -10,7 +10,6 @@ db_config = {
 }
 
 
-# Tengo que ajustar a los valores que tenemos nosotros
 def insert_user(user: UserDb):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
@@ -42,9 +41,36 @@ def get_user_by_username(username: str) -> UserDb | None:
                 phone=row[5],
             )
 
+def get_book_by_id(id: int) -> BookDb | None:
+    with mariadb.connect(**db_config) as conn:
+        with conn.cursor() as cursor:
+            sql = "SELECT id, isbn, title, category, total_pages, publication_date, purchased FROM book WHERE id=?"
+            cursor.execute(sql,(id,))
 
-# select_query = "SELECT id, name, email FROM users WHERE name LIKE ?"
-# cursor.execute(select_query, ("%Alice%",)) # Note the comma for single parameter tuple
+            row= cursor.fetchone()
+            
+            if row is None:
+                return None
+            
+            return BookDb(
+                id=row[0],
+                isbn=row[1],
+                title=row[2],
+                category=row[3],
+                total_pages=row[4],
+                publication_date=row[5],
+                purchased=row[6]
+            )
+            
+
+def insert_book(bookDb:BookDb) -> BookDb | None:
+    with mariadb.connect(**db_config) as conn:
+        with conn.cursor() as cursor:
+            sql = "INSERT INTO book(isbn,title,category,total_pages,publicaton_date,purchased) values (?,?,?,?,?,?)"
+            values = (bookDb.isbn,bookDb.title,bookDb.category,bookDb.total_pages,bookDb.publication_date,bookDb.purchased)
+            cursor.execute(sql,values)
+            conn.commit()
+            cursor.lastrowid
 
 # En memoria
 users: list[UserDb] = [

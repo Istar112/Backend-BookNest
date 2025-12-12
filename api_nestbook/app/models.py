@@ -21,7 +21,6 @@ class UserLoginIn(UserBase):
 
 
 class BookBase(BaseModel):
-    id : int
     isbn: str 
     title :str
     category : str
@@ -30,4 +29,6 @@ class BookBase(BaseModel):
     purchased : bool
 
 
+class BookDb(BookBase):
+    id:int
 
