@@ -1,4 +1,4 @@
-from app.models import UserDb,BookDb
+from app.models import UserDb, BookDb
 import mariadb
 
 db_config = {
@@ -13,7 +13,7 @@ db_config = {
 def insert_user(user: UserDb):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "insert into user(name, username,email,phone,password) values (?,?,?,?,?)"
+            sql = "INSERT INTO user(name, username, email, phone, password) VALUES (?,?,?,?,?)"
             values = (user.name, user.username, user.email, user.phone, user.password)
             cursor.execute(sql, values)
             conn.commit()
@@ -21,17 +21,16 @@ def insert_user(user: UserDb):
 
 
 def get_user_by_username(username: str) -> UserDb | None:
-    # TODOterminar esta funcion
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT id, username, name, password, email, phone FROM user WHERE username=? "
+            sql = "SELECT id, username, name, password, email, phone FROM user WHERE username=?"
             cursor.execute(sql, (username,))
 
             row = cursor.fetchone()
 
             if row is None:
                 return None
-            
+
             return UserDb(
                 id=row[0],
                 username=row[1],
@@ -41,17 +40,18 @@ def get_user_by_username(username: str) -> UserDb | None:
                 phone=row[5],
             )
 
+
 def get_book_by_isbn(isbn: str) -> BookDb | None:
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
             sql = "SELECT id, isbn, title, category, total_pages, publication_date, purchased FROM book WHERE isbn=?"
-            cursor.execute(sql,(isbn,))
-
-            row= cursor.fetchone()
-            
+            print(f"[DEBUG] Executing get_book_by_isbn with isbn={repr(isbn)}")
+            cursor.execute(sql, (isbn,))
+            row = cursor.fetchone()
+            print(f"[DEBUG] get_book_by_isbn result row={row!r}")
             if row is None:
                 return None
-            
+
             return BookDb(
                 id=row[0],
                 isbn=row[1],
@@ -61,20 +61,19 @@ def get_book_by_isbn(isbn: str) -> BookDb | None:
                 publication_date=row[5],
                 purchased=row[6]
             )
-            
 
-def insert_book(bookDb:BookDb) -> int | None:
+
+def insert_book(bookDb: BookDb) -> int | None:
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "INSERT INTO book(isbn,title,category,total_pages,publication_date,purchased) values (?,?,?,?,?,?)"
-            values = (bookDb.isbn,bookDb.title,bookDb.category,bookDb.total_pages,bookDb.publication_date,bookDb.purchased)
-            cursor.execute(sql,values)
+            sql = "INSERT INTO book(isbn, title, category, total_pages, publication_date, purchased) VALUES (?,?,?,?,?,?)"
+            values = (bookDb.isbn, bookDb.title, bookDb.category, bookDb.total_pages, bookDb.publication_date, bookDb.purchased)
+            cursor.execute(sql, values)
             conn.commit()
             return cursor.lastrowid
 
 
 def get_all_books() -> list[BookDb]:
-
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
             sql = "SELECT id, isbn, title, category, total_pages, publication_date, purchased FROM book"
@@ -95,12 +94,9 @@ def get_all_books() -> list[BookDb]:
                     )
                 )
             return books
-        
 
 
-        
-
-# En memoria
+# en memoria
 users: list[UserDb] = [
     UserDb(
         id=1,
