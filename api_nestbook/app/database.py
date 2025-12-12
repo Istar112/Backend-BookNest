@@ -41,11 +41,11 @@ def get_user_by_username(username: str) -> UserDb | None:
                 phone=row[5],
             )
 
-def get_book_by_id(id: int) -> BookDb | None:
+def get_book_by_isbn(isbn: str) -> BookDb | None:
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT id, isbn, title, category, total_pages, publication_date, purchased FROM book WHERE id=?"
-            cursor.execute(sql,(id,))
+            sql = "SELECT id, isbn, title, category, total_pages, publication_date, purchased FROM book WHERE isbn=?"
+            cursor.execute(sql,(isbn,))
 
             row= cursor.fetchone()
             
@@ -63,14 +63,14 @@ def get_book_by_id(id: int) -> BookDb | None:
             )
             
 
-def insert_book(bookDb:BookDb) -> BookDb | None:
+def insert_book(bookDb:BookDb) -> int | None:
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "INSERT INTO book(isbn,title,category,total_pages,publicaton_date,purchased) values (?,?,?,?,?,?)"
+            sql = "INSERT INTO book(isbn,title,category,total_pages,publication_date,purchased) values (?,?,?,?,?,?)"
             values = (bookDb.isbn,bookDb.title,bookDb.category,bookDb.total_pages,bookDb.publication_date,bookDb.purchased)
             cursor.execute(sql,values)
             conn.commit()
-            cursor.lastrowid
+            return cursor.lastrowid
 
 def get_all_books() -> list[BookDb]:
 
