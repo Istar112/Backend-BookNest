@@ -8,3 +8,4 @@ __pycache__/
 # Ignorar caché en cualquier subcarpeta de forma general
 **/__pycache__/
 
+  ../.vscode/
