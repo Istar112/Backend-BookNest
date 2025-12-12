@@ -7,7 +7,12 @@ from fastapi.security import OAuth2PasswordRequestForm
 from typing import List
 # tengo que importar las clases bassemodel
 from app.models import BookBase, BookDb
-from app.database import get_book_by_id,insert_book, get_all_books
+from app.database import (
+    get_book_by_id,
+    insert_book,
+    get_all_books,
+    get_book_by_isbn,
+)
 
 router = APIRouter(prefix="/books", tags=["Books"])
 
@@ -50,3 +55,10 @@ async def get_books():
         )
 
     return books
+
+@router.get("/get_book/{isbn}", response_model=BookDb, status_code=status.HTTP_200_OK)
+async def get_book_by_isbn(isbn: str):
+    book = get_book_by_isbn(isbn)
+    if not book:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Book not found")
+    return book

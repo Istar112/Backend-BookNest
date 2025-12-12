@@ -71,6 +71,7 @@ def insert_book(bookDb:BookDb) -> BookDb | None:
             cursor.execute(sql,values)
             conn.commit()
             cursor.lastrowid
+            
 
 def get_all_books() -> list[BookDb]:
 
@@ -94,6 +95,28 @@ def get_all_books() -> list[BookDb]:
                     )
                 )
             return books
+        
+
+def get_book_by_isbn(isbn: str) -> BookDb | None:
+    with mariadb.connect(**db_config) as conn:
+        with conn.cursor() as cursor:
+            sql = "SELECT id, isbn, title, category, total_pages, publication_date, purchased FROM book WHERE isbn=?"
+            cursor.execute(sql, (isbn,))
+
+            row = cursor.fetchone()
+            if row is None:
+                return None
+
+            return BookDb(
+                id=row[0],
+                isbn=row[1],
+                title=row[2],
+                category=row[3],
+                total_pages=row[4],
+                publication_date=row[5],
+                purchased=row[6]
+            )
+        
 
 # En memoria
 users: list[UserDb] = [
