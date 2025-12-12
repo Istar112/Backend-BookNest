@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-
+from datetime import date
 
 class UserBase(BaseModel):
     username: str
@@ -8,8 +8,8 @@ class UserBase(BaseModel):
 
 class UserIn(UserBase):
     name: str
-    #email: str
-    #phone: str
+    email: str
+    phone: str
 
 
 class UserDb(UserIn):
@@ -18,6 +18,16 @@ class UserDb(UserIn):
 
 class UserLoginIn(UserBase):
     pass
+
+
+class BookBase(BaseModel):
+    id : int
+    isbn: str 
+    title :str
+    category : str
+    total_pages : int
+    publication_date : date
+    purchased : bool
 
 
 

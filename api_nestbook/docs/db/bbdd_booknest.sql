@@ -14,7 +14,8 @@
 -- USUARIO
 -- =========================================
 CREATE TABLE IF NOT EXISTS user (
-    username VARCHAR(50) PRIMARY KEY,
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) UNIQUE,
     name VARCHAR(255),
     password VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
@@ -25,7 +26,8 @@ CREATE TABLE IF NOT EXISTS user (
 -- BOOK
 -- =========================================
 CREATE TABLE IF NOT EXISTS book (
-    isbn CHAR(13) PRIMARY KEY,
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    isbn CHAR(13) UNIQUE KEY,
     title VARCHAR(255) NOT NULL,
     category VARCHAR(50),
     total_pages INT CHECK (total_pages >= 0),
@@ -63,12 +65,12 @@ CREATE TABLE IF NOT EXISTS editorial (
 -- =========================================
 CREATE TABLE IF NOT EXISTS book_editorial (
     id INT AUTO_INCREMENT,
-    isbn_book CHAR(13),
+    id_book INT,
     id_editorial INT,
     PRIMARY KEY (id),
-    FOREIGN KEY (isbn_book) REFERENCES book (isbn) ON DELETE CASCADE,
+    FOREIGN KEY (id_book) REFERENCES book (id) ON DELETE CASCADE,
     FOREIGN KEY (id_editorial) REFERENCES editorial (id) ON DELETE CASCADE,
-    CONSTRAINT c_book_editorial UNIQUE (isbn_book, id_editorial)
+    CONSTRAINT c_book_editorial UNIQUE (id_book, id_editorial)
 );
 
 
@@ -77,14 +79,14 @@ CREATE TABLE IF NOT EXISTS book_editorial (
 -- =========================================
 CREATE TABLE IF NOT EXISTS reading (
     id INT AUTO_INCREMENT,
-    username VARCHAR(255),
-    isbn CHAR(13),
+    id_user INT,
+    id_book INT,
     reading_status VARCHAR(255),
     id_condition INT,
     PRIMARY KEY (id),
-    FOREIGN KEY (username) REFERENCES user (username) ON DELETE CASCADE,
-    FOREIGN KEY (isbn) REFERENCES book (isbn) ON DELETE CASCADE,
-    CONSTRAINT c_username_isbn UNIQUE (username, isbn)
+    FOREIGN KEY (id_user) REFERENCES user (id) ON DELETE CASCADE,
+    FOREIGN KEY (id_book) REFERENCES book (id) ON DELETE CASCADE,
+    CONSTRAINT c_user_book UNIQUE (id_user,id_book)
 );
 
 -- =========================================
@@ -92,12 +94,12 @@ CREATE TABLE IF NOT EXISTS reading (
 -- =========================================
 CREATE TABLE IF NOT EXISTS book_author (
     id INT AUTO_INCREMENT,
-    isbn_book CHAR(13),
+    id_book INT,
     id_author INT,
     PRIMARY KEY (id),
-    FOREIGN KEY (isbn_book) REFERENCES book (isbn) ON DELETE CASCADE,
+    FOREIGN KEY (id_book) REFERENCES book (id) ON DELETE CASCADE,
     FOREIGN KEY (id_author) REFERENCES author (id) ON DELETE CASCADE,
-    CONSTRAINT c_book_author UNIQUE (isbn_book, id_author)
+    CONSTRAINT c_book_author UNIQUE (id_book, id_author)
 );
 
 -- ========================================
