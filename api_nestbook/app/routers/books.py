@@ -3,9 +3,11 @@ from fastapi import APIRouter, status, HTTPException, Depends
 from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordRequestForm
 
+#lista para libros
+from typing import List
 # tengo que importar las clases bassemodel
 from app.models import BookBase, BookDb
-from app.database import get_book_by_id,insert_book
+from app.database import get_book_by_id,insert_book, get_all_books
 
 router = APIRouter(prefix="/books", tags=["Books"])
 
@@ -32,4 +34,19 @@ async def create_book(book_in: BookBase):
     )
     return {"message": "User created successfully"}    
 
-#@router.get("/get_book")
+@router.get("/get_books/", response_model=List[BookDb], status_code=status.HTTP_200_OK)
+async def get_books():
+    try:
+        books = get_all_books()
+    except MariaDBError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database error: {e}"
+        )
+    except AttributeError:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="get_all_books not implemented in app.database"
+        )
+
+    return books
