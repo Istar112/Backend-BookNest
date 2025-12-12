@@ -72,6 +72,7 @@ def insert_book(bookDb:BookDb) -> int | None:
             conn.commit()
             return cursor.lastrowid
 
+
 def get_all_books() -> list[BookDb]:
 
     with mariadb.connect(**db_config) as conn:
@@ -94,6 +95,10 @@ def get_all_books() -> list[BookDb]:
                     )
                 )
             return books
+        
+
+
+        
 
 # En memoria
 users: list[UserDb] = [
