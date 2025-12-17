@@ -13,11 +13,11 @@ from app.database import (
     get_book_by_isbn,
 )
 
-
 router = APIRouter(prefix="/books", tags=["Books"])
 
+
 # Create a book
-@router.post("/create_book/", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_book(book_in: BookBase):
     existing = get_book_by_isbn(book_in.isbn)
 
@@ -40,7 +40,8 @@ async def create_book(book_in: BookBase):
     )
     return {"message": "Book created successfully"}    
 
-@router.get("/get_books/", response_model=List[BookDb], status_code=status.HTTP_200_OK)
+
+@router.get("/", response_model=List[BookDb], status_code=status.HTTP_200_OK)
 async def get_books():
     try:
         books = get_all_books()
@@ -57,7 +58,8 @@ async def get_books():
 
     return books
 
-@router.get("/get_book/{isbn}", response_model=BookDb, status_code=status.HTTP_200_OK)
+
+@router.get("/{isbn}/", response_model=BookDb, status_code=status.HTTP_200_OK)
 async def get_book_by_isbn_endpoint(isbn: str):
     book = get_book_by_isbn(isbn)
     if not book:
