@@ -11,6 +11,7 @@ from app.database import (
     insert_book,
     get_all_books,
     get_book_by_isbn,
+    get_book_by_title_db
 )
 
 router = APIRouter(prefix="/books", tags=["Books"])
@@ -65,3 +66,10 @@ async def get_book_by_isbn_endpoint(isbn: str):
     if not book:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Book not found")
     return book
+
+
+@router.get("/", response_model=BookDb, status_code=status.HTTP_200_OK)
+async def get_book_by_title(title: str | None = None):
+    books = get_book_by_title_db(title)
+    return books
+

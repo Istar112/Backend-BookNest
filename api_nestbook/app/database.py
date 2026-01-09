@@ -63,6 +63,29 @@ def get_book_by_isbn(isbn: str) -> BookDb | None:
             )
 
 
+def get_book_by_title_db(title: str) -> list[BookDb]:
+    with mariadb.connect(**db_config) as conn:
+        with conn.cursor() as cursor:
+            sql = "SELECT id, isbn, title, category, total_pages, publication_date, purchased FROM book WHERE title LIKE ?"
+            print(f"[DEBUG] Executing get_book_by_title with title={repr(title)}")
+            cursor.execute(sql, (f"%{title}%",))
+            rows = cursor.fetchall()
+            print(f"[DEBUG] get_book_by_title result rows={rows!r}")
+            books = []      
+            for row in rows:
+                book = BookDb(
+                    id=row[0],
+                    isbn=row[1],
+                    title=row[2],
+                    category=row[3],
+                    total_pages=row[4],
+                    publication_date=row[5],
+                    purchased=row[6]
+                )
+                books.append(book)
+            return books
+        
+
 def insert_book(bookDb: BookDb) -> int | None:
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
