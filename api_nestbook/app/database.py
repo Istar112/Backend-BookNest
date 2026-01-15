@@ -1,5 +1,9 @@
 from app.models import UserDb, BookDb
 import mariadb
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+
 
 db_config = {
     "host": "myapidb",
@@ -70,9 +74,10 @@ def get_book_by_title_db(title: str) -> list[BookDb]:
             print(f"[DEBUG] Executing get_book_by_title with title={repr(title)}")
             cursor.execute(sql, (f"%{title}%",))
             rows = cursor.fetchall()
-            print(f"[DEBUG] get_book_by_title result rows={rows!r}")
+            logging.debug(f"[DEBUG] get_book_by_title result rows={rows!r}")
             books = []      
             for row in rows:
+                logging.debug(f"FIIIIIIIIIIIIIIIIIIIIIIIIIIIILA: {row[2]}")
                 book = BookDb(
                     id=row[0],
                     isbn=row[1],
@@ -85,6 +90,17 @@ def get_book_by_title_db(title: str) -> list[BookDb]:
                 books.append(book)
             return books
         
+def get_book_by_id_db(id:int) -> BookDb:
+    with mariadb.connect(**db_config) as conn:
+        with conn.cursor() as cursor:
+            sql = "SELECT id, isbn, title, category, total_pages, publication_date, purchased FROM book WHERE id=?"
+            print(f"[DEBUG] Executing get_book_by_id_db with id={repr(id)}")
+            cursor.execute(sql,(id,))
+            row = cursor.fetchone()
+            print(f"[DEBUG] get_book_by_id_db result row={row!r}")
+            if row is None:
+                return "Book doesn't exists"
+            
 
 def insert_book(bookDb: BookDb) -> int | None:
     with mariadb.connect(**db_config) as conn:
@@ -117,6 +133,7 @@ def get_all_books() -> list[BookDb]:
                     )
                 )
             return books
+
 
 
 # en memoria

@@ -3,6 +3,7 @@ from fastapi import APIRouter, status, HTTPException, Depends
 from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordRequestForm
 
+
 #lista para libros
 from typing import List
 # tengo que importar las clases bassemodel
@@ -13,13 +14,14 @@ from app.database import (
     get_book_by_isbn,
     get_book_by_title_db
 )
+from app.auth.auth import oauth2_scheme
 
 router = APIRouter(prefix="/books", tags=["Books"])
 
 
 # Create a book
 @router.post("/", status_code=status.HTTP_201_CREATED)
-async def create_book(book_in: BookBase):
+async def create_book(book_in: BookBase, token: str = Depends(oauth2_scheme)):
     existing = get_book_by_isbn(book_in.isbn)
 
     if existing:
@@ -42,34 +44,35 @@ async def create_book(book_in: BookBase):
     return {"message": "Book created successfully"}    
 
 
-@router.get("/", response_model=List[BookDb], status_code=status.HTTP_200_OK)
-async def get_books():
-    try:
-        books = get_all_books()
-    except MariaDBError as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Database error: {e}"
-        )
-    except AttributeError:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="get_all_books not implemented in app.database"
-        )
-
-    return books
-
-
 @router.get("/{isbn}/", response_model=BookDb, status_code=status.HTTP_200_OK)
-async def get_book_by_isbn_endpoint(isbn: str):
+async def get_book_by_isbn_endpoint(isbn: str,token: str = Depends(oauth2_scheme)):
     book = get_book_by_isbn(isbn)
     if not book:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Book not found")
     return book
 
 
-@router.get("/", response_model=BookDb, status_code=status.HTTP_200_OK)
-async def get_book_by_title(title: str | None = None):
+@router.get("/", response_model=List[BookDb], status_code=status.HTTP_200_OK)
+async def get_book_by_title(title: str | None = None,token: str = Depends(oauth2_scheme)):
+    if not title or not title.strip():
+        try:
+            books = get_all_books()
+        except MariaDBError as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Database error: {e}"
+            )
+              
+        except AttributeError:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="get_all_books not implemented in app.database"
+            )
+
+        return books
+    
+    # Query parameter
     books = get_book_by_title_db(title)
     return books
 
+#@router.post("/{idBook}/condition",status_code = status.HTTP_200_OK)
