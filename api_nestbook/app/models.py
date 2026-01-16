@@ -20,6 +20,13 @@ class UserDb(UserIn):
 class UserLoginIn(UserBase):
     pass
 
+#UPDATE USER
+
+class UserUpdate(UserIn):
+    name: str
+    email:str
+    phone: str
+
 
 # BOOKS
 class BookBase(BaseModel):
