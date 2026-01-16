@@ -115,6 +115,22 @@ def update_user_by_id(user_id: int, user_data: UserUpdate) -> bool:
         return False
     
 
+# Eliminar un usuario por id
+def delete_user_by_id(user_id: int) -> bool:
+    try:
+        with mariadb.connect(**db_config) as conn:
+            with conn.cursor() as cursor:
+                sql = "DELETE FROM user WHERE id = ?"
+                cursor.execute(sql, (user_id,))
+                conn.commit()
+
+                # Comprobar la eliminación
+                return cursor.rowcount > 0
+    except Exception as e:
+        logging.error(f"Error deleting user with ID {user_id}: {e}")
+        return False
+    
+
 # Buscar un libro por el isbn
 def get_book_by_isbn(isbn: str) -> BookDb | None:
     with mariadb.connect(**db_config) as conn:
@@ -185,6 +201,23 @@ def get_book_by_id_db(id:int) -> BookDb | None:
                 purchased=row[6],
                 cover_image=row[7]
             )
+    
+
+# Eliminar un libro por id
+def delete_book_by_id(book_id: int) -> bool:
+    try:
+        with mariadb.connect(**db_config) as conn:
+            with conn.cursor() as cursor:
+                sql = "DELETE FROM book WHERE id = ?"
+                cursor.execute(sql, (book_id,))
+                conn.commit()
+
+                # Comprobar la eliminación
+                return cursor.rowcount > 0
+    except Exception as e:
+        logging.error(f"Error deleting user with ID {book_id}: {e}")
+        return False
+    
 
             
 # Insertar un libro

@@ -133,4 +133,23 @@ async def add_status_to_book (
     return {"message": "Status added successfully"}   
 
 
-    
+# Eliminar un libro por id
+@router.delete("/{id}", status_code=status.HTTP_200_OK)
+async def delete_book(id: int, token: str = Depends(oauth2_scheme)):
+    # Verificar la existencia del libro
+    book = get_book_by_id_db(id)
+    if not book:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Book with ID {id} does not exist",
+        )
+
+    # Se elimina el libro
+    deleted = delete_book_by_id(id)
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to delete book.",
+        )
+
+    return
