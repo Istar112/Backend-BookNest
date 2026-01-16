@@ -73,14 +73,9 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usernarme and/or password incorrect",
         )
-
-    token = create_access_token(
-        UserBase(
-            username=user_found.username,
-            password=user_found.password
-
-            )
-        )
+    
+    # token con username y id no con userbase que tiene contraseña 
+    token = create_access_token(user_id=user_found.id,username=user_found.username)
     return token
 
 

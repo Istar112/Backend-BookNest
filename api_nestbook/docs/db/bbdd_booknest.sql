@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS book (
     category VARCHAR(50),
     total_pages INT CHECK (total_pages >= 0),
     publication_date DATE,
-    purchased BOOLEAN DEFAULT FALSE
+    purchased BOOLEAN DEFAULT FALSE,
+    cover_image VARCHAR(255)
 );
 
 -- =========================================
@@ -41,15 +42,15 @@ CREATE TABLE IF NOT EXISTS book (
 CREATE TABLE IF NOT EXISTS author (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name_author VARCHAR(255) NOT NULL,
-    country VARCHAR(100)
+    country VARCHAR(100),
+    image VARCHAR(255)
 );
 
 -- =========================================
 -- STATUS (desired, process, finished)
 -- =========================================
 CREATE TABLE IF NOT EXISTS status (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    category VARCHAR(50)
+    id INT AUTO_INCREMENT PRIMARY KEY
 );
 
 -- =========================================
@@ -82,10 +83,11 @@ CREATE TABLE IF NOT EXISTS reading (
     id_user INT,
     id_book INT,
     reading_status VARCHAR(255),
-    id_condition INT,
+    id_status INT,
     PRIMARY KEY (id),
     FOREIGN KEY (id_user) REFERENCES user (id) ON DELETE CASCADE,
     FOREIGN KEY (id_book) REFERENCES book (id) ON DELETE CASCADE,
+    FOREIGN KEY (id_status) REFERENCES status (id) ON DELETE CASCADE,
     CONSTRAINT c_user_book UNIQUE (id_user,id_book)
 );
 
@@ -106,7 +108,7 @@ CREATE TABLE IF NOT EXISTS book_author (
 -- STATUS
 -- ========================================
 CREATE TABLE IF NOT EXISTS finished (
-    id INT AUTO_INCREMENT,
+    id INT,
     finish_date DATE NOT NULL,
     rating VARCHAR(255),
     PRIMARY KEY (id),
@@ -114,7 +116,7 @@ CREATE TABLE IF NOT EXISTS finished (
 );
 
 CREATE TABLE IF NOT EXISTS process (
-    id INT AUTO_INCREMENT,
+    id INT,
     num_pag INT NOT NULL,
     date_start DATE NOT NULL,
     PRIMARY KEY (id),
@@ -122,7 +124,8 @@ CREATE TABLE IF NOT EXISTS process (
 );
 
 CREATE TABLE IF NOT EXISTS desired (
-    id INT AUTO_INCREMENT,
+    id INT,
+    comment VARCHAR(255),
     PRIMARY KEY (id),
     FOREIGN KEY (id) REFERENCES status (id) ON DELETE CASCADE
 );
