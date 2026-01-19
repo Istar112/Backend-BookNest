@@ -44,6 +44,92 @@ def get_user_by_username(username: str) -> UserDb | None:
                 email=row[4],
                 phone=row[5],
             )
+        
+
+# Obtener el usuario por el id
+def get_user_by_id(id: int) -> UserDb | None:
+    with mariadb.connect(**db_config) as conn:
+        with conn.cursor() as cursor:
+            sql = "SELECT id, username, name, password, email, phone FROM user WHERE id=?"
+            cursor.execute(sql, (id,))
+
+            row = cursor.fetchone()
+
+            if row is None:
+                return None
+
+            return UserDb(
+                id=row[0],
+                username=row[1],
+                name=row[2],
+                password=row[3],
+                email=row[4],
+                phone=row[5],
+            )
+        
+
+# Modificar un usuario por id
+def update_user_by_id(user_id: int, user_data: UserUpdate) -> bool:
+
+    try:
+        with mariadb.connect(**db_config) as conn:
+            with conn.cursor() as cursor:
+                # lista hecha para poder ir modificando los campos
+                fields = []
+                values = []
+
+                if user_data.name:
+                    fields.append("name = ?")
+                    values.append(user_data.name)
+                if user_data.username:
+                    fields.append("username = ?")
+                    values.append(user_data.username)
+                if user_data.email:
+                    fields.append("email = ?")
+                    values.append(user_data.email)
+                if user_data.phone:
+                    fields.append("phone = ?")
+                    values.append(user_data.phone)
+                if user_data.password:  # actualizar contraseña
+                    fields.append("password = ?")
+                    values.append(user_data.password)
+
+                # Si no hay cambios, salir
+                if not fields:
+                    logging.debug("There are no fields to update.")
+                    return False
+
+                # Construir la consulta SQL
+                query = f"UPDATE user SET {', '.join(fields)} WHERE id = ?"
+                values.append(user_id)  # Agregar el ID al final de los valores
+
+                # Ejecutar la consulta
+                logging.debug(f"Running query: {query} with values: {values}")
+                cursor.execute(query, tuple(values))
+                conn.commit()
+
+                # devuelve TRUE si han habido cambios y FALSE si no ha encontrado al usuario
+                return cursor.rowcount > 0
+    except Exception as e:
+        logging.error(f"Error updating user with ID {user_id}: {e}")
+        return False
+    
+
+# Eliminar un usuario por id
+def delete_user_by_id(user_id: int) -> bool:
+    try:
+        with mariadb.connect(**db_config) as conn:
+            with conn.cursor() as cursor:
+                sql = "DELETE FROM user WHERE id = ?"
+                cursor.execute(sql, (user_id,))
+                conn.commit()
+
+                # Comprobar la eliminación
+                return cursor.rowcount > 0
+    except Exception as e:
+        logging.error(f"Error deleting user with ID {user_id}: {e}")
+        return False
+    
 
 # Buscar un libro por el isbn
 def get_book_by_isbn(isbn: str) -> BookDb | None:
@@ -115,7 +201,44 @@ def get_book_by_id_db(id:int) -> BookDb | None:
                 purchased=row[6],
                 cover_image=row[7]
             )
+    
 
+# Eliminar un libro por id
+def delete_book_by_id(book_id: int) -> bool:
+    try:
+        with mariadb.connect(**db_config) as conn:
+            with conn.cursor() as cursor:
+                sql = "DELETE FROM book WHERE id = ?"
+                cursor.execute(sql, (book_id,))
+                conn.commit()
+
+                # Comprobar la eliminación
+                return cursor.rowcount > 0
+    except Exception as e:
+        logging.error(f"Error deleting user with ID {book_id}: {e}")
+        return False
+    
+
+# Modificar libro por id
+def update_book_by_id(book_id: int, updated_data: dict) -> bool:
+    try:
+        with mariadb.connect(**db_config) as conn:
+            with conn.cursor() as cursor:
+                # se construye la consulta SQL
+                fields = [f"{key} = ?" for key in updated_data.keys()]
+                sql = f"UPDATE book SET {', '.join(fields)} WHERE id = ?"
+                values = list(updated_data.values()) + [book_id]
+
+                logging.debug(f"Ejecutando SQL: {sql} con valores: {values}")
+                cursor.execute(sql, values)
+                conn.commit()
+
+                # Se verifican las filas 
+                return cursor.rowcount > 0
+    except Exception as e:
+        logging.error(f"Error al actualizar el libro con ID {book_id}: {e}")
+        return False
+    
             
 # Insertar un libro
 def insert_book(bookDb: BookDb) -> int | None:

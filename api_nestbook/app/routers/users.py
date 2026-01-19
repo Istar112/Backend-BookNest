@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 # tengo que importar las clases bassemodel
 from app.models import UserBase,UserIn,UserDb,UserLoginIn
 from app.auth.auth import create_access_token, Token, verify_password, get_hash_password
-from app.database import users, insert_user, get_user_by_username
+from app.database import *
 
 
 # APIRouter included in app (FastAPI)
@@ -79,10 +79,68 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
     return token
 
 
+@router.put("/{id}", status_code=status.HTTP_200_OK)
+async def update_user(id: int, user_update: UserUpdate):
+    # Verificar si el usuario existe
+    user = get_user_by_id(id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with ID {id} does not exist",
+        )
 
-    
+    # Actualizar la información del usuario
+    updated = update_user_by_id(id, user_update)
+    if not updated:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to update user.",
+        )
 
+    return {"message": "User updated successfully"}
 
+# Eliminar un usuario por id
+@router.delete("/{id}", status_code=status.HTTP_200_OK)
+async def delete_user(id: int):
+    # Verificar la existencia del usuario
+    user = get_user_by_id(id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with ID {id} does not exist",
+        )
+
+    # Se elimina el usuario
+    deleted = delete_user_by_id(id)
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to delete user.",
+        )
+
+    return
+
+"""
+# Obtener usuarios por id
+@router.get("/{id}", status_code=status.HTTP_200_OK)
+async def get_user_by_id_ep(id: int):
+    # obtener el usuario de la bbdd
+    user = get_user_by_id(id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with ID {id} does not exist",
+        )
+
+    # devuelve los datos, menos la contraseña
+    return {
+        "id": user.id,
+        "name": user.name,
+        "username": user.username,
+        "email": user.email,
+        "phone": user.phone,
+    }
+    """
 
 """
 @router.get(
