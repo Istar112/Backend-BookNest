@@ -27,6 +27,16 @@ class UserUpdate(UserIn):
     email:str
     phone: str
 
+# UPDATE BOOK
+class BookUpdate(BaseModel):
+    isbn: Optional[str]
+    title: Optional[str]
+    category: Optional[str]
+    total_pages: Optional[int]
+    publication_date: Optional[date]
+    purchased: Optional[bool]
+    cover_image: Optional[str]
+
 
 # BOOKS
 class BookBase(BaseModel):

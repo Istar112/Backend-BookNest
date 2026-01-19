@@ -153,3 +153,32 @@ async def delete_book(id: int, token: str = Depends(oauth2_scheme)):
         )
 
     return
+
+
+# Modificar un libro por id
+@router.put("/{id}", status_code=status.HTTP_200_OK)
+async def update_book(id: int, book_update: BookUpdate, token: str = Depends(oauth2_scheme)):
+
+    # Verificar que el libro existe
+    book = get_book_by_id_db(id)
+    if not book:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Book with ID {id} does not exist",
+        )
+
+    # Convertir el modelo ignorando los campos vacíos
+    updated_book_data = book_update.dict(exclude_unset=True)
+
+    # Actualizar los datos del libro en la base de datos
+    updated = update_book_by_id(id, updated_book_data)
+    if not updated:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to update book.",
+        )
+
+    return {
+        "message": "Book updated successfully",
+        "updated_fields": updated_book_data
+    }

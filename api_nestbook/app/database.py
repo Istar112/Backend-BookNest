@@ -219,6 +219,26 @@ def delete_book_by_id(book_id: int) -> bool:
         return False
     
 
+# Modificar libro por id
+def update_book_by_id(book_id: int, updated_data: dict) -> bool:
+    try:
+        with mariadb.connect(**db_config) as conn:
+            with conn.cursor() as cursor:
+                # se construye la consulta SQL
+                fields = [f"{key} = ?" for key in updated_data.keys()]
+                sql = f"UPDATE book SET {', '.join(fields)} WHERE id = ?"
+                values = list(updated_data.values()) + [book_id]
+
+                logging.debug(f"Ejecutando SQL: {sql} con valores: {values}")
+                cursor.execute(sql, values)
+                conn.commit()
+
+                # Se verifican las filas 
+                return cursor.rowcount > 0
+    except Exception as e:
+        logging.error(f"Error al actualizar el libro con ID {book_id}: {e}")
+        return False
+    
             
 # Insertar un libro
 def insert_book(bookDb: BookDb) -> int | None:
