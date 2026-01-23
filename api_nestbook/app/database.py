@@ -320,10 +320,47 @@ def insert_reading(reading : ReadingDb) -> None:
             cursor.execute(sql,values)
             conn.commit()
 
-# id: int
-# id_user:int
-# id_book: int
-# id_status: int
+# Obtener una lectura
+def get_readings_db() -> list[ReadingDb]:
+    with mariadb.connect(**db_config) as conn:
+        with conn.cursor() as cursor:
+            sql = "SELECT id, id_user, id_book, reading_status, id_status FROM reading"
+            cursor.execute(sql)
+            rows = cursor.fetchall()
+
+            readings: list[ReadingDb] = []
+            for row in rows:
+                readings.append(
+                    ReadingDb(
+                        id=row[0],
+                        id_user=row[1],
+                        id_book=row[2],
+                        reading_status= row[3],
+                        id_status=row[4]
+                    )
+                )
+            return readings
+        
+# Obtener lecturas por status
+def get_readings_by_status(status:str) -> list[ReadingDb]:
+    with mariadb.connect(**db_config) as conn:
+        with conn.cursor() as cursor:
+            sql = "SELECT id, id_user, id_book, reading_status, id_status FROM reading WHERE reading_status=?"
+            cursor.execute(sql,(status.lower(),))
+            rows = cursor.fetchall()
+
+            readings: list[ReadingDb] = []
+            for row in rows:
+                readings.append(
+                    ReadingDb(
+                        id=row[0],
+                        id_user=row[1],
+                        id_book=row[2],
+                        reading_status= row[3],
+                        id_status=row[4]
+                    )
+                )
+            return readings
     
 
 # En memoria
