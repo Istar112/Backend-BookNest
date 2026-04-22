@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from typing import List
 from app.models import *
 from app.database import *    
-from app.auth.auth import oauth2_scheme, get_user_id_from_token
+from app.auth.auth import get_current_user, oauth2_scheme, get_user_id_from_token
 from datetime import date
 from mariadb import IntegrityError
 
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/books", tags=["Books"])
 
 # Create a book
 @router.post("/", status_code=status.HTTP_201_CREATED)
-async def create_book(book_in: BookBase, token: str = Depends(oauth2_scheme)):
+async def create_book(book_in: BookBase, token: str = Depends(get_current_user)):
     existing = get_book_by_isbn(book_in.isbn)
 
     if existing:
@@ -40,7 +40,7 @@ async def create_book(book_in: BookBase, token: str = Depends(oauth2_scheme)):
 
 # Busca un libro por su isbn
 @router.get("/{isbn}/", response_model=BookDb, status_code=status.HTTP_200_OK)
-async def get_book_by_isbn_endpoint(isbn: str,token: str = Depends(oauth2_scheme)):
+async def get_book_by_isbn_endpoint(isbn: str,token: str = Depends(get_current_user)):
     book = get_book_by_isbn(isbn)
     if not book:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Book not found")
@@ -48,7 +48,7 @@ async def get_book_by_isbn_endpoint(isbn: str,token: str = Depends(oauth2_scheme
 
 # busca todos los libros si esta vacio o por titulo(Query parameter)
 @router.get("/", response_model=List[BookDb], status_code=status.HTTP_200_OK)
-async def get_book_by_title(title: str | None = None,token: str = Depends(oauth2_scheme)):
+async def get_book_by_title(title: str | None = None,token: str = Depends(get_current_user)):
     if not title or not title.strip():
         try:
             books = get_all_books()
@@ -75,7 +75,7 @@ async def get_book_by_title(title: str | None = None,token: str = Depends(oauth2
 async def add_status_to_book (
     idBook: int,
     status_in: StatusUpdate ,
-    token: str = Depends(oauth2_scheme) 
+    token: str = Depends(get_current_user) 
 ):
     book: BookDb = get_book_by_id_db(idBook)
 
@@ -135,7 +135,7 @@ async def add_status_to_book (
 
 # Eliminar un libro por id
 @router.delete("/{id}", status_code=status.HTTP_200_OK)
-async def delete_book(id: int, token: str = Depends(oauth2_scheme)):
+async def delete_book(id: int, token: str = Depends(get_current_user)):
     # Verificar la existencia del libro
     book = get_book_by_id_db(id)
     if not book:
@@ -157,7 +157,7 @@ async def delete_book(id: int, token: str = Depends(oauth2_scheme)):
 
 # Modificar un libro por id
 @router.put("/{id}", status_code=status.HTTP_200_OK)
-async def update_book(id: int, book_update: BookUpdate, token: str = Depends(oauth2_scheme)):
+async def update_book(id: int, book_update: BookUpdate, token: str = Depends(get_current_user)):
 
     # Verificar que el libro existe
     book = get_book_by_id_db(id)

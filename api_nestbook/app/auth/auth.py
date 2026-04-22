@@ -1,5 +1,5 @@
 import bcrypt
-
+from fastapi import Depends, HTTPException, status
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
@@ -34,14 +34,7 @@ def verify_password(plain_pw, hashed_pw) -> bool:
     hashed_pw_bytes = hashed_pw.encode("utf-8")
     return bcrypt.checkpw(password=plain_pw_bytes, hashed_password=hashed_pw_bytes)
 
-# La funcion del profe con UserBase
-# def create_access_token(user: UserBase) -> Token:
-#     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MIN)
-#     to_encode = {"sub": user.username, "exp": expire}
-#     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-#     return Token(access_token=encoded_jwt, token_type="bearer")
-
-# Nueva funcion sin contraseña en el token
+# Modificada la funcion para incluir el id del usuario registrado
 def create_access_token(user_id: int, username: str) -> Token:
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MIN)
     to_encode = {
@@ -51,7 +44,6 @@ def create_access_token(user_id: int, username: str) -> Token:
     }
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return Token(access_token=encoded_jwt, token_type="bearer")
-
 
 
 def decode_token(token: str) -> TokenData:
@@ -64,6 +56,7 @@ def decode_token(token: str) -> TokenData:
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    
 # Añadido la funcion de obtener el id del usuario registrado
 def get_user_id_from_token(token: str) -> int:
     try:
@@ -75,3 +68,6 @@ def get_user_id_from_token(token: str) -> int:
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
+# validar token
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> TokenData:
+    return decode_token(token)
