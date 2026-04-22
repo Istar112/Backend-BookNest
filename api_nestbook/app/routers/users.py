@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 # tengo que importar las clases bassemodel
 from app.models import UserBase,UserIn,UserDb,UserLoginIn
-from app.auth.auth import create_access_token, Token, verify_password, get_hash_password
+from app.auth.auth import TokenData, create_access_token, Token, get_current_user, verify_password, get_hash_password
 from app.database import *
 
 
@@ -80,7 +80,7 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
 
 
 @router.put("/{id}", status_code=status.HTTP_200_OK)
-async def update_user(id: int, user_update: UserUpdate):
+async def update_user(id: int, user_update: UserUpdate, token: TokenData = Depends(get_current_user)):
     # Verificar si el usuario existe
     user = get_user_by_id(id)
     if not user:
@@ -96,12 +96,17 @@ async def update_user(id: int, user_update: UserUpdate):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Failed to update user.",
         )
+    
+    # Encriptar la nueva contraseña si no da error luego
+    if user_update.password:
+        user_update.password = get_hash_password(user_update.password)
+
 
     return {"message": "User updated successfully"}
 
-# Eliminar un usuario por id
+# Eliminar un usuario por id con validación de token
 @router.delete("/{id}", status_code=status.HTTP_200_OK)
-async def delete_user(id: int):
+async def delete_user(id: int, token: TokenData = Depends(get_current_user)):
     # Verificar la existencia del usuario
     user = get_user_by_id(id)
     if not user:
@@ -120,43 +125,5 @@ async def delete_user(id: int):
 
     return
 
-"""
-# Obtener usuarios por id
-@router.get("/{id}", status_code=status.HTTP_200_OK)
-async def get_user_by_id_ep(id: int):
-    # obtener el usuario de la bbdd
-    user = get_user_by_id(id)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with ID {id} does not exist",
-        )
 
-    # devuelve los datos, menos la contraseña
-    return {
-        "id": user.id,
-        "name": user.name,
-        "username": user.username,
-        "email": user.email,
-        "phone": user.phone,
-    }
-    """
-
-"""
-@router.get(
-
-)
-async def get_all_users(token: str = Depends(oauth2_schema)):
-    data: TokenData = decode_token(token)
-
-    if data.username not in [u.username for u in users)]:
-        raise HTTPException(
-            status_code=statu
-        )
-    
-    return [
-        UserOut(id=UserDb.id)
-    ]
-
-"""
 
