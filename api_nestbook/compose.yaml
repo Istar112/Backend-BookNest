@@ -9,16 +9,18 @@ services:
       - myapi_network
     volumes:
       - ./app:/app/app
+    env_file:
+      - .env
     depends_on:
       - myapidb
 
   myapidb:
     image: mariadb
     environment:
-      MARIADB_ROOT_PASSWORD: root
-      MARIADB_USER: myapi
-      MARIADB_PASSWORD: myapi
-      MARIADB_DATABASE: myapi
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
     networks:
       - myapi_network
     volumes:

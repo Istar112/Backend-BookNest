@@ -5,3 +5,4 @@ bcrypt
 python-jose
 python-multipart
 mariadb
+pydantic-settings

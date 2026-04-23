@@ -1,15 +1,17 @@
 import bcrypt
+from app.config import settings
 from fastapi import Depends, HTTPException, status
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from pydantic import BaseModel
-
 from app.models import UserBase
 
-SECRET_KEY = "1234567890"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MIN = 7 * 24 * 60
+
+
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
+ACCESS_TOKEN_EXPIRE_MIN = settings.ACCESS_TOKEN_EXPIRE_MIN
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login/")
 
