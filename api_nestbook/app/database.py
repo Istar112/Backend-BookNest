@@ -2,16 +2,17 @@ from app.models import *
 import mariadb
 import logging
 from datetime import date
+from app.config import settings
 
 logging.basicConfig(level=logging.DEBUG)
 
 # Configuraciones de la conexion de mariaDb
 db_config = {
-    "host": "myapidb",
-    "port": 3306,
-    "user": "myapi",
-    "password": "myapi",
-    "database": "myapi",
+    "host": settings.MARIADB_HOST,
+    "port": settings.MARIADB_PORT,
+    "user": settings.MARIADB_USER,
+    "password": settings.MARIADB_PASSWORD,
+    "database": settings.MARIADB_DATABASE,
 }
 
 # Insertar un usuario

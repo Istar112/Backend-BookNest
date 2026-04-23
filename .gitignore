@@ -9,3 +9,5 @@ __pycache__/
 **/__pycache__/
 
   ../.vscode/
+# ignorar archivos de entorno
+api_nestbook/.env
