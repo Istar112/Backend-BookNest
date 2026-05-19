@@ -1,19 +1,11 @@
-# Tengo que importar todas las clases
 from fastapi import APIRouter, status, HTTPException, Depends
-from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordRequestForm
-
-# tengo que importar las clases bassemodel
-from app.models import UserBase,UserIn,UserDb,UserLoginIn
+from app.models.user import UserBase,UserIn,UserDb,UserLoginIn,UserUpdate
 from app.auth.auth import TokenData, create_access_token, Token, get_current_user, verify_password, get_hash_password
-from app.database import *
+from app.database.user import insert_user, get_user_by_username, get_user_by_id, update_user_by_id, delete_user_by_id
 
-
-# APIRouter included in app (FastAPI)
 router = APIRouter(prefix="/users", tags=["Users"])
 
-
-# Signup and create new user.
 @router.post("/signup/", status_code=status.HTTP_201_CREATED)
 async def create_user(user_in: UserIn):
     userDb = get_user_by_username(user_in.username)
@@ -28,7 +20,7 @@ async def create_user(user_in: UserIn):
 
     insert_user(
         UserDb(
-            id=len(users) + 1,
+            id=0, # ignored
             name=user_in.name,
             username=user_in.username,
             password=hashed_password,
@@ -39,13 +31,9 @@ async def create_user(user_in: UserIn):
     return {"message": "User created successfully"}
 
 
-
-# Login and validate
-# Depends clase de de FastApi
-# form_data es una clase no un diccionario
 @router.post("/login/", response_model=Token, status_code=status.HTTP_200_OK)
 async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
-    # 1. Para acceder a username y password?
+   
     username :str | None = form_data.username
     password :str | None = form_data.password
 
@@ -55,33 +43,27 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
             detail="Username and/or password incorrect"
         )
     
-    # Para memoria
-    # user_found = [user for user in users if user.username == form_data.username]
-    # 2. Busco el usuario en la base de datos
     user_found = get_user_by_username(username)
 
     if not user_found:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Usernarme and/or password incorrect",
+            detail="Username and/or password incorrect",
         )
 
-   
-    #3. Compruebo contraseñas
     if not verify_password(password,user_found.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Usernarme and/or password incorrect",
+            detail="Username and/or password incorrect",
         )
     
-    # token con username y id no con userbase que tiene contraseña 
     token = create_access_token(user_id=user_found.id,username=user_found.username)
     return token
 
 
 @router.put("/{id}", status_code=status.HTTP_200_OK)
 async def update_user(id: int, user_update: UserUpdate, token: TokenData = Depends(get_current_user)):
-    # Verificar si el usuario existe
+
     user = get_user_by_id(id)
     if not user:
         raise HTTPException(
@@ -89,41 +71,37 @@ async def update_user(id: int, user_update: UserUpdate, token: TokenData = Depen
             detail=f"User with ID {id} does not exist",
         )
 
-    # Actualizar la información del usuario
+    if user_update.password:
+        user_update.password = get_hash_password(user_update.password)
+
     updated = update_user_by_id(id, user_update)
+
     if not updated:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Failed to update user.",
         )
     
-    # Encriptar la nueva contraseña si no da error luego
-    if user_update.password:
-        user_update.password = get_hash_password(user_update.password)
-
-
     return {"message": "User updated successfully"}
 
-# Eliminar un usuario por id con validación de token
+
 @router.delete("/{id}", status_code=status.HTTP_200_OK)
 async def delete_user(id: int, token: TokenData = Depends(get_current_user)):
-    # Verificar la existencia del usuario
+
     user = get_user_by_id(id)
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"User with ID {id} does not exist",
         )
 
-    # Se elimina el usuario
     deleted = delete_user_by_id(id)
+
     if not deleted:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Failed to delete user.",
         )
 
-    return
-
-
-
+    return {"message": "User deleted successfully"}

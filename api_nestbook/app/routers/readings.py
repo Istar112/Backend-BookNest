@@ -1,30 +1,27 @@
 # imports
 from fastapi import APIRouter, status, HTTPException, Depends
-from pydantic import BaseModel
-from fastapi.security import OAuth2PasswordRequestForm
-from typing import List
-from app.models import *
-from app.database import *    
-from app.auth.auth import get_current_user, oauth2_scheme, get_user_id_from_token
+from typing import List, Optional
+from app.models.reading import ReadingBase, ReadingDb, Finished, Process,StatusDb
+from app.database.db_config import db_config
+from app.database.reading import get_readings_by_user, get_reading_by_id_db, insert_process, insert_reading, update_finished, insert_finished
+from app.auth.auth import TokenData, get_current_user
 from datetime import date
-from mariadb import IntegrityError
+import mariadb
 
 router = APIRouter(prefix="/readings", tags=["Readings"])
 
 @router.get("/", response_model=list[ReadingDb], status_code=status.HTTP_200_OK)
-async def get_reading(reading_status: str | None = None ,token: str = Depends(get_current_user)):
-    # if status none devuelve todas las lecturas del usuario
-    if not status:
-        return get_readings_db()
-    
-    # Query parameter - filrar por status process - finished - desired
-    if reading_status not in ["process","finished","desired"]:
+async def get_reading(
+    reading_status: str | None = None,
+    token: TokenData = Depends(get_current_user),
+):
+    if not reading_status:
+        return get_readings_by_user(token.user_id)
+    if reading_status not in ["process", "finished"]:
         raise HTTPException(
-            status_code = status.HTTP_400_BAD_REQUEST,
-            detail ="invalid status. It must be <process>,<finished>, <desired>"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="invalid status. It must be <process>, <finished>",
         )
+    return get_readings_by_user(token.user_id, reading_status)
 
-    return get_readings_by_status(reading_status)
 
- 
-    
