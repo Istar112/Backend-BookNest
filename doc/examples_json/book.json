@@ -1,0 +1,9 @@
+{
+  "isbn": "9783161484100",
+  "title": "The Great Gatsby",
+  "category": "Fiction",
+  "total_pages": 180,
+  "publication_date": "1925-04-10",
+  "purchased": true,
+  "cover_image": "https://example.com/gatsby-cover.jpg"
+}

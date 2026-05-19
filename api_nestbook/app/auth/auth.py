@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from pydantic import BaseModel
-from app.models import UserBase
+from app.models.user import UserBase
 
 
 
@@ -13,7 +13,7 @@ SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MIN = settings.ACCESS_TOKEN_EXPIRE_MIN
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login/")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/users/login/")
 
 class Token(BaseModel):
     access_token: str
@@ -22,6 +22,7 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
+    user_id: int | None = None
 
 
 def get_hash_password(plain_pw: str) -> str:
@@ -51,7 +52,7 @@ def create_access_token(user_id: int, username: str) -> Token:
 def decode_token(token: str) -> TokenData:
     try:
         payload: dict = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return TokenData(username=payload.get("sub"))
+        return TokenData(username=payload.get("sub"), user_id=payload.get("user_id"))
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
