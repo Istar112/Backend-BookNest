@@ -1,4 +1,4 @@
-from app.models.reading import ReadingDb, Process, Finished, ProcessDb, FinishedDb
+from app.models.reading import ReadingDb, Process, Finished, ProcessDb, FinishedDb, FinishedOut, ProcessOut
 from app.database.db_config import db_config
 import mariadb
 import logging
@@ -250,3 +250,20 @@ def get_readings_by_user(user_id: int, status: str | None = None) -> list[Readin
                     )
                 )
             return readings
+
+def get_status_by_id_status(status_id: int, status_type: str) -> ProcessDb | FinishedDb | None:
+    with mariadb.connect(**db_config) as conn:
+        with conn.cursor() as cursor:
+            if status_type == "process":
+                sql = "SELECT id, num_pag, date_start FROM process WHERE id=?"
+                cursor.execute(sql, (status_id,))
+                row = cursor.fetchone()
+                if row:
+                    return ProcessOut(num_pag=row[1], date_start=row[2])
+            elif status_type == "finished":
+                sql = "SELECT id, finish_date, rating FROM finished WHERE id=?"
+                cursor.execute(sql, (status_id,))
+                row = cursor.fetchone()
+                if row:
+                    return FinishedOut(finish_date=row[1], rating=row[2])
+    return None

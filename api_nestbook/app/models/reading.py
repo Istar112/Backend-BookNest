@@ -38,3 +38,11 @@ class ProcessDb(Process):
 
 class FinishedDb(Finished):
     id: Optional[int] = None
+
+class ProcessOut(BaseModel):
+    num_pag: int
+    date_start: date
+
+class FinishedOut(BaseModel):
+    finish_date: date
+    rating: int

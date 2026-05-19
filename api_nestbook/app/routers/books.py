@@ -3,7 +3,7 @@ from typing import List
 from app.models.book import BookBase, BookDb, BookUpdate
 from app.models.reading import FinishedDb, Process, Finished, ProcessDb, ReadingDb, StatusUpdateProcess, StatusUpdateFinished
 from app.database.book import (get_book_by_isbn,get_all_books, get_book_by_title_db, get_book_by_id_db, delete_book_by_id, update_book_by_id, insert_book)
-from app.database.reading import change_reading_status_to_process, insert_status, insert_process, insert_finished,insert_reading,get_reading_by_user_and_book,update_finished, change_reading_status_to_finished
+from app.database.reading import change_reading_status_to_process, insert_status, insert_process, insert_finished,insert_reading,get_reading_by_user_and_book,update_finished, change_reading_status_to_finished, get_status_by_id_status
 from app.auth.auth import TokenData, get_current_user
 from datetime import date
 from mariadb import IntegrityError, Error as MariaDBError
@@ -220,4 +220,16 @@ async def update_status_to_process(id: int, status_in: StatusUpdateProcess, toke
             date_start=status_in.date_start
         )
     )
-    return {"message": "Reading status updated to process successfully"}  
+    return {"message": "Reading status updated to process successfully"}
+
+@router.get("/{id}/status", status_code=status.HTTP_200_OK)
+async def get_book_status(id: int, token: TokenData = Depends(get_current_user)):
+    reading = get_reading_by_user_and_book(token.user_id, id)
+    if not reading:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Reading for book ID {id} does not exist for the user",
+        )
+    
+
+    return get_status_by_id_status(reading.id_status, reading.reading_status)
