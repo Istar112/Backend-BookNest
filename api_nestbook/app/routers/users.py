@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from app.models.user import UserBase,UserIn,UserDb,UserLoginIn,UserUpdate
+from app.models.user import UserBase,UserIn,UserDb,UserLoginIn, UserOut,UserUpdate
 from app.auth.auth import TokenData, create_access_token, Token, get_current_user, verify_password, get_hash_password
 from app.database.user import insert_user, get_user_by_username, get_user_by_id, update_user_by_id, delete_user_by_id
 
@@ -105,3 +105,20 @@ async def delete_user(id: int, token: TokenData = Depends(get_current_user)):
         )
 
     return {"message": "User deleted successfully"}
+
+@router.get("/me/", response_model=UserOut, status_code=status.HTTP_200_OK)
+async def read_current_user(token: TokenData = Depends(get_current_user)):
+    user = get_user_by_id(token.user_id)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    return UserOut(
+        name=user.name,
+        username=user.username,
+        email=user.email,
+        phone=user.phone
+    )
