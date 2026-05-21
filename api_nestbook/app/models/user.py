@@ -21,3 +21,9 @@ class UserUpdate(UserIn):
     name: str
     email:str
     phone: str
+
+class UserOut(BaseModel):
+    name: str
+    username: str
+    email: str
+    phone: str
