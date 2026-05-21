@@ -4,26 +4,14 @@ from fastapi import Depends, HTTPException, status
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
-from pydantic import BaseModel
+from app.models.token import Token, TokenData
 from app.models.user import UserBase
-
-
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MIN = settings.ACCESS_TOKEN_EXPIRE_MIN
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/users/login/")
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
-class TokenData(BaseModel):
-    username: str | None = None
-    user_id: int | None = None
-
 
 def get_hash_password(plain_pw: str) -> str:
     pw_bytes = plain_pw.encode("utf-8")
@@ -37,7 +25,7 @@ def verify_password(plain_pw, hashed_pw) -> bool:
     hashed_pw_bytes = hashed_pw.encode("utf-8")
     return bcrypt.checkpw(password=plain_pw_bytes, hashed_password=hashed_pw_bytes)
 
-# Modificada la funcion para incluir el id del usuario registrado
+
 def create_access_token(user_id: int, username: str) -> Token:
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MIN)
     to_encode = {
@@ -59,18 +47,6 @@ def decode_token(token: str) -> TokenData:
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
-# Añadido la funcion de obtener el id del usuario registrado
-def get_user_id_from_token(token: str) -> int:
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: int = payload.get("user_id")
-        if user_id is None:
-            raise HTTPException(status_code=401, detail="Invalid token")
-        return user_id
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
 
-# validar token
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> TokenData:
     return decode_token(token)
