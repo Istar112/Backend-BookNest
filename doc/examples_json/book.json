@@ -1,9 +1,52 @@
-{
-  "isbn": "9783161484100",
-  "title": "The Great Gatsby",
-  "category": "Fiction",
-  "total_pages": 180,
-  "publication_date": "1925-04-10",
-  "purchased": true,
-  "cover_image": "https://example.com/gatsby-cover.jpg"
-}
+[
+  {
+    "isbn": "9780140449136",
+    "title": "The Odyssey",
+    "category": "Classic",
+    "total_pages": 544,
+    "publication_date": "1946-01-01",
+    "purchased": true,
+    "cover_image": "https://res.cloudinary.com/dccdeyylr/image/upload/q_auto/f_auto/v1779374661/odyssey_b3beqt.jpg",
+    "desired": false
+  },
+  {
+    "isbn": "9780141439518",
+    "title": "Pride and Prejudice",
+    "category": "Romance",
+    "total_pages": 480,
+    "publication_date": "1813-01-28",
+    "purchased": true,
+    "cover_image": "https://res.cloudinary.com/dccdeyylr/image/upload/q_auto/f_auto/v1779374661/pride_zej0gw.jpg",
+    "desired": false
+  },
+  {
+    "isbn": "9780142437230",
+    "title": "Don Quixote",
+    "category": "Adventure",
+    "total_pages": 1072,
+    "publication_date": "1605-01-16",
+    "purchased": false,
+    "cover_image": "https://res.cloudinary.com/dccdeyylr/image/upload/q_auto/f_auto/v1779372804/images_cui60x.jpg",
+    "desired": false
+  },
+  {
+    "isbn": "9780451524935",
+    "title": "1984",
+    "category": "Dystopian",
+    "total_pages": 328,
+    "publication_date": "1949-06-08",
+    "purchased": true,
+    "cover_image": "https://m.media-amazon.com/images/I/71kxa1-0mfL.jpg",
+    "desired": false
+  },
+  {
+    "isbn": "9780743273565",
+    "title": "The Great Gatsby",
+    "category": "Classic",
+    "total_pages": 180,
+    "publication_date": "1925-04-10",
+    "purchased": false,
+    "cover_image": "https://m.media-amazon.com/images/I/81af+MCATTL.jpg",
+    "desired": false
+  }
+]
