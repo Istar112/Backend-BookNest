@@ -29,7 +29,8 @@ async def create_book(book_in: BookBase, token: TokenData = Depends(get_current_
             total_pages=book_in.total_pages,
             publication_date=book_in.publication_date,
             purchased=book_in.purchased,
-            cover_image=book_in.cover_image
+            cover_image=book_in.cover_image,
+            desired=book_in.desired
         )
     )
     return {"message": "Book created successfully"}    

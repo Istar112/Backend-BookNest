@@ -6,7 +6,7 @@ from app.models.book import BookDb
 def get_book_by_isbn(isbn: str) -> BookDb | None:
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT id, isbn, title, category, total_pages, publication_date, purchased, cover_image FROM book WHERE isbn=?"
+            sql = "SELECT id, isbn, title, category, total_pages, publication_date, purchased, desired, cover_image FROM book WHERE isbn=?"
             print(f"[DEBUG] Executing get_book_by_isbn with isbn={repr(isbn)}")
             cursor.execute(sql, (isbn,))
             row = cursor.fetchone()
@@ -22,14 +22,15 @@ def get_book_by_isbn(isbn: str) -> BookDb | None:
                 total_pages=row[4],
                 publication_date=row[5],
                 purchased=row[6],
-                cover_image =row[7],
+                desired=row[7],
+                cover_image=row[8],
             )
 
 
 def get_book_by_title_db(title: str) -> list[BookDb]:
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT id, isbn, title, category, total_pages, publication_date, purchased, cover_image FROM book WHERE title LIKE ?"
+            sql = "SELECT id, isbn, title, category, total_pages, publication_date, purchased, desired, cover_image FROM book WHERE title LIKE ?"
             print(f"[DEBUG] Executing get_book_by_title with title={repr(title)}")
             cursor.execute(sql, (f"%{title}%",))
             rows = cursor.fetchall()
@@ -45,7 +46,8 @@ def get_book_by_title_db(title: str) -> list[BookDb]:
                     total_pages=row[4],
                     publication_date=row[5],
                     purchased=row[6],
-                    cover_image = row[7]
+                    desired=row[7],
+                    cover_image=row[8]
                 )
                 books.append(book)
             return books
@@ -54,7 +56,7 @@ def get_book_by_title_db(title: str) -> list[BookDb]:
 def get_book_by_id_db(id:int) -> BookDb | None:
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT id, isbn, title, category, total_pages, publication_date, purchased, cover_image FROM book WHERE id=?"
+            sql = "SELECT id, isbn, title, category, total_pages, publication_date, purchased, desired, cover_image FROM book WHERE id=?"
             print(f"[DEBUG] Executing get_book_by_id_db with id={repr(id)}")
             cursor.execute(sql,(id,))
             row = cursor.fetchone()
@@ -70,7 +72,8 @@ def get_book_by_id_db(id:int) -> BookDb | None:
                 total_pages=row[4],
                 publication_date=row[5],
                 purchased=row[6],
-                cover_image=row[7]
+                desired=row[7],
+                cover_image=row[8]
             )
     
 
@@ -88,6 +91,9 @@ def delete_book_by_id(book_id: int) -> bool:
     
 
 def update_book_by_id(book_id: int, updated_data: dict) -> bool:
+    if not updated_data:
+        return True # Nothing to update
+        
     try:
         with mariadb.connect(**db_config) as conn:
             with conn.cursor() as cursor:
@@ -97,7 +103,7 @@ def update_book_by_id(book_id: int, updated_data: dict) -> bool:
                 logging.debug(f"Ejecutando SQL: {sql} con valores: {values}")
                 cursor.execute(sql, values)
                 conn.commit()
-                return cursor.rowcount > 0           
+                return cursor.rowcount >= 0           
     except Exception as e:
         logging.error(f"Error al actualizar el libro con ID {book_id}: {e}")
         return False
@@ -106,8 +112,8 @@ def update_book_by_id(book_id: int, updated_data: dict) -> bool:
 def insert_book(bookDb: BookDb) -> int | None:
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "INSERT INTO book(isbn, title, category, total_pages, publication_date, purchased, cover_image) VALUES (?,?,?,?,?,?,?)"
-            values = (bookDb.isbn, bookDb.title, bookDb.category, bookDb.total_pages, bookDb.publication_date, bookDb.purchased, bookDb.cover_image)
+            sql = "INSERT INTO book(isbn, title, category, total_pages, publication_date, purchased, desired, cover_image) VALUES (?,?,?,?,?,?,?,?)"
+            values = (bookDb.isbn, bookDb.title, bookDb.category, bookDb.total_pages, bookDb.publication_date, bookDb.purchased, bookDb.desired, bookDb.cover_image)
             cursor.execute(sql, values)
             conn.commit()
             return cursor.lastrowid
@@ -116,7 +122,7 @@ def insert_book(bookDb: BookDb) -> int | None:
 def get_all_books() -> list[BookDb]:
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT id, isbn, title, category, total_pages, publication_date, purchased, cover_image FROM book"
+            sql = "SELECT id, isbn, title, category, total_pages, publication_date, purchased, desired, cover_image FROM book"
             cursor.execute(sql)
             rows = cursor.fetchall()
 
@@ -131,7 +137,8 @@ def get_all_books() -> list[BookDb]:
                         total_pages=row[4],
                         publication_date=row[5],
                         purchased=row[6],
-                        cover_image=row[7]
+                        desired=row[7],
+                        cover_image=row[8]
                     )
                 )
             return books
