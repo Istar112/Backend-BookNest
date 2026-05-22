@@ -24,7 +24,8 @@ services:
     networks:
       - myapi_network
     volumes:
-      - ./myapidb_data:/var/lib/mysql
+      - myapidb_data:/var/lib/mysql
+      - ../doc/db/Physical-Design/bbdd_booknest.sql:/docker-entrypoint-initdb.d/bbdd_booknest.sql:ro
 
   myapiadminer:
     image: adminer
@@ -36,3 +37,7 @@ services:
 networks:
   myapi_network:
     driver: bridge
+
+volumes:
+  myapidb_data:
+
