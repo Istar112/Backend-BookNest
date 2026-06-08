@@ -19,7 +19,9 @@ CREATE TABLE IF NOT EXISTS user (
     name VARCHAR(255),
     password VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
-    phone VARCHAR(15)
+    phone VARCHAR(15),
+    streak_days INT DEFAULT 0,
+    last_reading_date DATE NULL
 );
 
 -- =========================================
